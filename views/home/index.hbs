@@ -1,1 +1,98 @@
-<h1>home page</h1>
+<div class="container mt-5">
+    <div class="row">
+        <div class="mb-3">
+            <input type="text" name="token" class="form-control" placeholder="Token">
+        </div>
+        <div class="mb-3">
+            <input type="text" name="id" class="form-control" placeholder="Id sản phẩm">
+        </div>
+        <div class="col-md-12">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Link Hình Ảnh Sản Phẩm">
+                <button class="btn btn-primary" type="button" id="add-link-img">Add</button>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <ul id="load-img">
+            </ul>
+        </div>
+        <div class="col-md-12 d-flex justify-content-end">
+            <button type="button" class="btn btn-primary" id="apply">Lưu</button>
+        </div>
+    </div>
+</div>
+<script>
+    function validURL(str) {
+        var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+            '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+            '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+            '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+        return !!pattern.test(str);
+    }
+    function toDataUrl(url) {
+        return new Promise(resolve => {
+            let xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                let reader = new FileReader();
+                reader.onloadend = function () {
+                    resolve(reader.result);
+                }
+                reader.readAsDataURL(xhr.response);
+            };
+            xhr.open('GET', url);
+            xhr.responseType = 'blob';
+            xhr.send();
+        })
+
+    }
+    $(document).ready(() => {
+        var listImg = [];
+        $("#add-link-img").click((e) => {
+            let link = $(e.target).parent().find("input");
+            let loadImg = $("#load-img");
+            if (validURL(link.val())) {
+                listImg.push(link.val())
+                link.val("")
+            }
+
+            let content = ""
+            listImg.forEach((val) => {
+                content += `
+                <li>
+                    <div>${val}</div>
+                </li>
+                `
+            })
+            loadImg.html(content)
+        })
+        $("#apply").click(async (e) => {
+            $(e.target).css({
+                display: "none"
+            })
+            $.ajax({
+                url: "/upload-img",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-app-token": $('input[name="token"]').val()
+                },
+                method: "POST",
+                data: JSON.stringify({
+                    id: $('input[name="id"]').val(),
+                    medias: listImg
+                })
+            }).done((res) => {
+                $(e.target).css({
+                    display: "block"
+                })
+                alert("Tải ảnh thành công")
+            }).fail(function (xhr, err) {
+                $(e.target).css({
+                    display: "block"
+                })
+                alert("Tải ảnh thất bại")
+            });
+        })
+    })
+</script>
