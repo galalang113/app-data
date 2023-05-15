@@ -22,6 +22,11 @@
     </div>
 </div>
 <script>
+    (function () {
+        if (sessionStorage.getItem("token_me")) {
+            $('input[name="token"]').val(sessionStorage.getItem("token_me"))
+        }
+    })()
     function validURL(str) {
         var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
             '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
@@ -71,6 +76,11 @@
             $(e.target).css({
                 display: "none"
             })
+
+            if ($('input[name="token"]').val()) {
+                sessionStorage.setItem("token_me", $('input[name="token"]').val())
+            }
+
             $.ajax({
                 url: "/upload-img",
                 headers: {
