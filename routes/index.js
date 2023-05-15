@@ -72,7 +72,7 @@ function route(app) {
 				let key = `key${index}`
 				let base64 = await getBase64(req.body.medias[index])
 				promisesInput[key] = axios.post(
-					`https://apis.haravan.com/com/products/1046892692/images.json`,
+					`https://apis.haravan.com/com/products/${req.body.id}/images.json`,
 					{
 						image: {
 							attachment: base64,
